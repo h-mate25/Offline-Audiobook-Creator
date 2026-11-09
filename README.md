@@ -1,115 +1,124 @@
-# Offline Audiobook Creator 1.0
+# Offline Audiobook Creator
 
-Offline PDF/DOCX/TXT/Markdown → MP3 hangoskönyv-készítő Piper TTS-sel.
+Offline PDF-, DOCX-, TXT- és Markdown-dokumentumokból MP3-hangoskönyvet készítő
+Windows-alkalmazás. A hanggenerálást a Piper TTS, az opcionális szövegnormalizálást
+pedig a Dockerben futó NVIDIA NeMo Text Processing végzi.
 
-## 1.0 funkciók
+## Funkciók
 
-- PDF, DOCX, TXT és MD dokumentumok beolvasása.
+- PDF, DOCX, TXT és Markdown fájlok feldolgozása.
 - Magyar és angol offline Piper hangok.
-- Több száz oldalas dokumentumok biztonságos darabolása.
-- PDF-zajok és linkfeliratok tisztítása.
-- Szerkeszthető felolvasási előnézet generálás előtt.
-- Hangteszt egy rövid próbamondattal.
-- Rövid dokumentum-hangminta lejátszással és letöltéssel.
-- 0,3 / 0,5 / 1 / 3 / 5 másodperces beszúrható szünetek.
-- Természetes, nyugodt és gyorsabb hangpresetek.
-- Automatikus NeMo → helyi normalizálás.
-- Beszédbarát webcím- és e-mail-kezelés, így a hosszú URL-ek nem törik meg a
-  normalizálást.
-- Dinamikus bekezdés- és tagmondat-szünetek a természetesebb ritmusért.
-- Beépített és egyéni kiejtési szótár rövidítésekhez és nevekre.
-- Folytatható feldolgozás cache-sel.
-- Dockeres Linux-környezet NeMo-támogatással.
+- Több száz oldalas dokumentumok darabolása és folytatható feldolgozása.
+- Szerkeszthető szövegelőnézet a generálás előtt.
+- Külön hangteszt rövid próbamondattal.
+- Rövid dokumentum-hangminta lejátszása és letöltése.
+- Kézzel beszúrható, 0,3 / 0,5 / 1 / 3 / 5 másodperces szünetek.
+- Természetes, nyugodt és tömörebb beszédpresetek.
+- Automatikus mondat-, tagmondat- és bekezdésszünetek.
+- Webcímek és e-mail-címek beszédbarát előkészítése.
+- Beépített és egyéni kiejtési szabályok rövidítésekhez és nevekhez.
+- Dockeres, offline használatra alkalmas feldolgozás NeMo-támogatással.
 
-## Rendes Windows-telepítő
+## Követelmények
 
-A `Offline-Audiobook-Creator-Setup-1.0.1.exe` telepítő létrehozza a program
-mappáját, a Start menü- és opcionális asztali parancsikont, valamint az első
-telepítéskor ellenőrzi a Docker Desktopot és a WSL2-t. Ha a Docker Desktop
-hiányzik és a `winget` elérhető, a telepítő meghívja a hivatalos Docker Desktop
-csomag telepítőjét. A Piper magyar és angol hangmodellek az installer részei.
+### Ajánlott Windows-felhasználóknak
 
-A telepítő a felhasználó írható AppData-mappáját használja az input, output és
-cache adatokhoz, ezért a programnak nem kell a Program Files mappájába írnia.
-A Docker-képfelépítés első alkalommal internetkapcsolatot igényel; utána a
-feldolgozás helyben, a Docker-konténerben történik.
+- Windows 10 vagy Windows 11.
+- Python 3.10–3.13 a natív telepítéshez.
+- FFmpeg az MP3-fájlok összefűzéséhez.
+- Docker Desktop és WSL2 a NeMo-normalizáláshoz vagy a Dockeres indításhoz.
 
-Fejlesztői gépen a telepítő újraépítése:
+A telepítő és a telepítőszkriptek ellenőrzik a szükséges összetevőket. Az első
+telepítéskor internetkapcsolat kell a Python-függőségek, a Piper hangmodellek és
+szükség esetén a Docker-kép letöltéséhez. A feldolgozás ezután helyben történik.
 
-```powershell
-winget install --exact --id JRSoftware.InnoSetup
-.\build-installer.ps1 -Version 1.0.1
-```
+## Gyors kezdés Windows alatt
 
-Ha a `models` mappában hiányoznak a hangmodellek, a build script automatikusan
-letölti a hivatalos magyar és angol Piper fájlokat.
+### Natív Pythonos indítás
 
-## Gyors telepítés Windowsra
+1. Klónozd vagy töltsd le a repositoryt.
+2. Dupla kattintással futtasd a `setup-and-start.cmd` fájlt.
+3. A böngészőben nyisd meg a megjelenő helyi címet, alapértelmezés szerint:
+   `http://127.0.0.1:8765`.
 
-Töltsd le vagy klónozd a repositoryt, majd dupla kattintással futtasd:
+A szkript létrehozza a `.venv` virtuális környezetet, telepíti a függőségeket,
+létrehozza az adatkönyvtárakat és letölti a magyar, illetve angol Piper
+hangmodelleket.
 
-```text
-setup-and-start.cmd
-```
-
-Ez létrehozza a `.venv` környezetet, telepíti a Python-függőségeket, ellenőrzi
-az FFmpeg-et, letölti a magyar és angol Piper hangmodelleket, majd elindítja a
-helyi webappot.
-
-PowerShellből:
+PowerShellből ugyanez:
 
 ```powershell
-.\install-windows.ps1 -InstallFfmpeg
-.\start-windows.ps1
+.\\install-windows.ps1 -InstallFfmpeg
+.\\start-windows.ps1
 ```
 
-Dockeres használatnál az `Offline-Audiobook-Creator-Launcher.exe` elindítja a
-konténert, megvárja a webes felületet, majd megnyitja az alapértelmezett
-böngészőt a `http://127.0.0.1:8766` címen. A telepítő ezt a launchert a Start
-menübe és – ha kéred – az asztalra is kihelyezi.
-
-A részletes telepítési leírás: [docs/INSTALLATION_HU.md](docs/INSTALLATION_HU.md).
-
-## Használat
-
-Indítás után nyisd meg: `http://127.0.0.1:8765`.
-
-Az alkalmazás négy lépésben működik: **Forrás → Hangteszt → Szöveg →
-Generálás**. A teljes felhasználói kézikönyv a webapp jobb felső sarkában lévő
-**Felhasználói útmutató** gombból és a [docs/USER_GUIDE_HU.md](docs/USER_GUIDE_HU.md)
-fájlból érhető el.
-
-## CLI példa
+Ha a hangmodelleket külön szeretnéd beszerezni:
 
 ```powershell
-.\.venv\Scripts\audiobook-maker.exe make .\book.pdf --language hu
-.\.venv\Scripts\audiobook-maker.exe make .\book.docx --language en --output .\outputs\book-en.mp3
+.\\install-windows.ps1 -SkipModels
 ```
 
-## Docker és NeMo
+### Kiadási telepítő és indító
+
+A kiadási csomag tartalmazhatja az `Offline-Audiobook-Creator-Setup-*.exe`
+telepítőt és az `Offline-Audiobook-Creator-Launcher.exe` indítót. Ezek a Docker
+Desktopot, a konténert és a böngészőben megnyíló helyi felületet kezelik.
+
+A kész kiadások a [GitHub Releases](https://github.com/h-mate25/Offline-Audiobook-Creator/releases)
+oldalon találhatók. A bináris kiadási fájlokat nem tároljuk a forráskód
+repositoryjában.
+
+## Dockeres indítás
 
 Docker Desktop futása után:
 
 ```powershell
 docker compose build
-$env:AUDIOBOOK_PORT=8766
+$env:AUDIOBOOK_PORT = "8766"
 docker compose up -d
 ```
 
-Ezután: `http://127.0.0.1:8766`.
+Ezután nyisd meg: `http://127.0.0.1:8766`.
 
-A Dockeres változat Linuxos Python-környezetben futtatja a NeMo Text Processinget.
-Natív Windows alatt az Automatikus mód szükség esetén a helyi szabályokra vált.
+Leállítás:
 
-## Természetesebb beszéd finomhangolása
+```powershell
+docker compose down
+```
 
-A **Webcímek kezelése** alapértelmezésben csak a domainnevet tartja meg, majd
-nyelv szerint „pont”/„dot” alakban készíti elő. A hosszú linkek elhagyhatók, a
-teljes cím pedig külön választható.
+A Docker-konténer Linuxos Python-környezetben futtatja a NeMo Text Processinget.
+Az `AUDIOBOOK_DATA_DIR` környezeti változóval külön, felhasználói írható
+adatmappa adható meg:
 
-A **Természetes tagolási szünetek** bekezdéseknél és tagmondatoknál óvatosan
-extra csendet illesztenek be. A mondatok közötti alap-szünetet továbbra is a
-Piper **Mondatszünet** értéke adja.
+```powershell
+$env:AUDIOBOOK_DATA_DIR = "C:/Users/<felhasználó>/Offline Audiobook Creator/data"
+$env:AUDIOBOOK_PORT = "8766"
+docker compose up -d
+```
+
+## Használat
+
+A webes felület négy lépésből áll:
+
+1. **Forrás** – PDF, DOCX, TXT vagy Markdown dokumentum feltöltése.
+2. **Hangteszt** – nyelv, hang és Piper-paraméterek kipróbálása egy rövid mondattal.
+3. **Szöveg** – a tisztított, felolvasásra előkészített szöveg ellenőrzése és szerkesztése.
+4. **Generálás** – a teljes MP3 elkészítése és letöltése.
+
+A részletes gomb- és beállításleírást a webapp **Felhasználói útmutató** gombja
+és a [magyar felhasználói kézikönyv](docs/USER_GUIDE_HU.md) tartalmazza.
+
+## Természetesebb beszéd beállításai
+
+A **Webcímek kezelése** beállítás három módot támogat:
+
+- `domain` – csak a domain marad meg, például `example.com`;
+- `skip` – a webcím kimarad a felolvasásból;
+- `full` – a teljes cím megmarad, de beszédbarát alakban készül elő.
+
+A **Természetes tagolási szünetek** bekezdéseknél és tagmondatoknál illesztenek
+be óvatos extra csendet. Az alap mondatszünetet továbbra is a Piper
+**Mondatszünet** beállítása adja.
 
 Az **Egyéni kiejtési javítások** mezőben soronként adható meg szabály:
 
@@ -118,36 +127,106 @@ Kft. = káefté
 AI = ááj
 ```
 
-A parancssoros használat ugyanezeket a lehetőségeket támogatja:
+Parancssorból ugyanez:
 
 ```powershell
-.\.venv\Scripts\audiobook-maker.exe make .\book.pdf --language hu `
-  --preset natural --link-mode domain --pronunciation-file .\pronunciations.txt
+.\\.venv\\Scripts\\audiobook-maker.exe make .\\book.pdf --language hu `
+  --preset natural --link-mode domain `
+  --pronunciation-file .\\pronunciations.txt
 ```
 
-CUDA/NVIDIA GPU gyorsítás nincs bekapcsolva; a feldolgozás Piperrel és a
-Dockerben futó NeMo normalizálóval CPU-n, offline történik.
+Az aktuális változat CPU-alapú. CUDA- és NVIDIA-GPU-gyorsítás nincs bekapcsolva;
+a Piper hanggenerálás és a NeMo szövegnormalizálás helyben fut.
 
-## Mappák
+## Parancssoros használat
+
+```powershell
+.\\.venv\\Scripts\\audiobook-maker.exe make .\\book.pdf --language hu
+.\\.venv\\Scripts\\audiobook-maker.exe make .\\book.docx `
+  --language en --output .\\outputs\\book-en.mp3
+```
+
+Hasznos természetességi kapcsolók:
+
+```text
+--preset {natural,calm,compact}
+--link-mode {domain,skip,full}
+--no-dynamic-pauses
+--pronunciation-file <UTF-8 fájl>
+```
+
+## Adatkönyvtárak
 
 | Mappa | Tartalom |
 | --- | --- |
-| `models` | Piper hangmodellek |
-| `inputs` | bemeneti dokumentumok |
+| `models` | Piper `.onnx` és `.onnx.json` hangmodellek |
+| `inputs` | feldolgozandó dokumentumok |
 | `outputs` | elkészült MP3-fájlok |
-| `work` / `work-ui` | cache és munkameneti részeredmények |
+| `work` | CLI-gyorsítótár és részeredmények |
+| `work-ui` | webes munkamenetek és részeredmények |
 
-## Fejlesztői telepítés
+Ezek a mappák felhasználói adatokat tartalmazhatnak, ezért nem kerülnek a
+Git repositoryba.
+
+## Fejlesztés
 
 ```powershell
 py -3.13 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e .
-node --check src\audiobook_maker\static\app.js
+.\\.venv\\Scripts\\python.exe -m pip install -e .
 python -m compileall -q src
+node --check src\\audiobook_maker\\static\\app.js
 ```
 
-## Megjegyzések
+A szövegfeldolgozási tesztek futtatása:
 
-Szkennelt, csak képet tartalmazó PDF-hez OCR szükséges. A program a kijelölhető
-szöveget tudja közvetlenül feldolgozni.
+```powershell
+$env:PYTHONPATH = "src"
+python -m unittest discover -s tests
+```
+
+Windows-telepítő buildelése:
+
+```powershell
+winget install --exact --id JRSoftware.InnoSetup
+.\\build-installer.ps1 -Version 1.0.1
+```
+
+Docker-indító buildelése:
+
+```powershell
+.\\build-launcher.ps1 -SelfContained
+```
+
+## Projektstruktúra
+
+```text
+src/audiobook_maker/   alkalmazáskód és webes felület
+docs/                  telepítési és felhasználói dokumentáció
+installer/             Inno Setup konfiguráció
+launcher/              Docker-indító Windows alkalmazás
+tests/                 tesztek
+Dockerfile             NeMo-kompatibilis Docker-környezet
+docker-compose.yml     helyi konténerindítás
+```
+
+## Korlátok
+
+- A csak képet tartalmazó, szkennelt PDF-ekhez külön OCR-lépés szükséges.
+- A program a kijelölhető szöveget tudja közvetlenül feldolgozni.
+- A NeMo Text Processing a Dockeres módban érhető el teljes körűen; natív
+  Windows alatt az automatikus mód a helyi szabályokra válthat.
+- A feldolgozás sebessége a dokumentum hosszától, a Piper hangmodelltől és a
+  számítógép teljesítményétől függ.
+
+## Dokumentáció
+
+- [Telepítés és terjesztés](docs/INSTALLATION_HU.md)
+- [Magyar felhasználói kézikönyv](docs/USER_GUIDE_HU.md)
+- [Változásnapló](CHANGELOG.md)
+
+## Licenc
+
+A repository jelenleg nem tartalmaz `LICENSE` fájlt. A projekt licencelését a
+szerzőnek kell megadnia, mielőtt a kódot mások újra felhasználnák vagy
+terjesztenék.
 
