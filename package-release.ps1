@@ -22,7 +22,9 @@ $items = @(
     "CHANGELOG.md",
     "README.md",
     "docker-compose.yml",
+    "build-launcher.ps1",
     "install-windows.ps1",
+    "launcher",
     "package-release.ps1",
     "pyproject.toml",
     "setup-and-start.cmd",
@@ -48,6 +50,17 @@ Get-ChildItem -Path $staging -Directory -Filter "__pycache__" -Recurse -ErrorAct
     Remove-Item -Recurse -Force
 Get-ChildItem -Path $staging -Directory -Filter "*.egg-info" -Recurse -ErrorAction SilentlyContinue |
     Remove-Item -Recurse -Force
+Get-ChildItem -Path $staging -Directory -Filter "bin" -Recurse -ErrorAction SilentlyContinue |
+    Remove-Item -Recurse -Force
+Get-ChildItem -Path $staging -Directory -Filter "obj" -Recurse -ErrorAction SilentlyContinue |
+    Remove-Item -Recurse -Force
+Get-ChildItem -Path $staging -Directory -Filter "publish" -Recurse -ErrorAction SilentlyContinue |
+    Remove-Item -Recurse -Force
+
+$launcherExe = Join-Path $releaseRoot "Offline-Audiobook-Creator-Launcher.exe"
+if (Test-Path $launcherExe) {
+    Copy-Item -LiteralPath $launcherExe -Destination (Join-Path $staging "Offline-Audiobook-Creator-Launcher.exe") -Force
+}
 
 Compress-Archive -Path (Join-Path $staging "*") -DestinationPath $archive -CompressionLevel Optimal
 Write-Host "Release csomag elkészült: $archive" -ForegroundColor Green

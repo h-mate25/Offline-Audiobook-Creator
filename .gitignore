@@ -16,4 +16,8 @@ downloads/
 *.wav
 .env
 release/
+launcher/bin/
+launcher/obj/
+launcher/publish/
+launcher.log
 

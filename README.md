@@ -36,6 +36,11 @@ PowerShellből:
 .\start-windows.ps1
 ```
 
+Dockeres használatnál az `Offline-Audiobook-Creator-Launcher.exe` elindítja a
+konténert, megvárja a webes felületet, majd megnyitja az alapértelmezett
+böngészőt a `http://127.0.0.1:8766` címen. A launchert a projekt mappájából
+futtasd, ahol a `docker-compose.yml` található.
+
 A részletes telepítési leírás: [docs/INSTALLATION_HU.md](docs/INSTALLATION_HU.md).
 
 ## Használat

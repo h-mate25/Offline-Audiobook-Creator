@@ -12,6 +12,27 @@ A telepítő létrehozza a `.venv` virtuális környezetet, telepíti a Python-
 függőségeket, létrehozza az adatkönyvtárakat és letölti a magyar és angol Piper
 hangmodelleket. A telepítés után a böngészőben megnyílik a helyi UI.
 
+## EXE indító Dockerhez
+
+Ha a csomag tartalmazza az `Offline-Audiobook-Creator-Launcher.exe` fájlt,
+dupla kattintással indítható. Az indító:
+
+1. ellenőrzi vagy elindítja a Docker Desktopot;
+2. elindítja a `docker-compose.yml` alapján a konténert;
+3. megvárja, amíg a webes API elérhető lesz;
+4. megnyitja az alapértelmezett böngészőt a `http://127.0.0.1:8766` címen.
+
+Hiba esetén a projekt mappájában létrejön a `launcher.log` naplófájl.
+
+Az EXE elkészítéséhez .NET 9 SDK szükséges:
+
+```powershell
+.\build-launcher.ps1 -SelfContained
+```
+
+A `-SelfContained` változat futtatásához a felhasználónak nem kell külön .NET
+runtime-ot telepítenie.
+
 PowerShellből ugyanez:
 
 ```powershell
