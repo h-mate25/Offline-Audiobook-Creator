@@ -1,5 +1,13 @@
 # Változásnapló
 
+## 1.0.1
+
+- Klasszikus Windows-telepítő Inno Setuppal.
+- Docker Desktop- és WSL2-ellenőrzés/telepítő-meghívás az installerből.
+- Per-user adatkönyvtár, így a telepített alkalmazásnak nem kell a Program
+  Files mappájába írnia.
+- A magyar és angol Piper hangmodellek bekerülnek a Windows telepítőbe.
+
 ## 1.0.0
 
 - Többlépcsős offline webes felület: Forrás → Hangteszt → Szöveg → Generálás.

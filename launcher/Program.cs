@@ -8,6 +8,7 @@ internal static class Program
 {
     private const int Port = 8766;
     private const string UiUrl = "http://127.0.0.1:8766";
+    private const string AppDataFolderName = "Offline Audiobook Creator";
 
     [STAThread]
     private static void Main()
@@ -18,10 +19,14 @@ internal static class Program
         {
             AppendLog(logPath, "Launcher started.");
             var root = FindProjectRoot();
-            logPath = Path.Combine(root, "launcher.log");
+            var dataRoot = GetDataRoot();
+            Directory.CreateDirectory(dataRoot);
+            logPath = Path.Combine(dataRoot, "launcher.log");
             AppendLog(logPath, $"Project root: {root}");
+            AppendLog(logPath, $"Data root: {dataRoot}");
+            PrepareDataFolders(root, dataRoot, logPath);
             EnsureDocker(root, logPath);
-            StartCompose(root, logPath);
+            StartCompose(root, dataRoot, logPath);
             WaitForUi(logPath);
             Process.Start(new ProcessStartInfo { FileName = UiUrl, UseShellExecute = true });
             AppendLog(logPath, $"Browser opened: {UiUrl}");
@@ -34,6 +39,36 @@ internal static class Program
                 "Offline Audiobook Creator",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
+        }
+    }
+
+    private static string GetDataRoot()
+    {
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (string.IsNullOrWhiteSpace(localAppData))
+            throw new InvalidOperationException("A Windows helyi alkalmazásadat-mappája nem érhető el.");
+
+        return Path.Combine(localAppData, AppDataFolderName, "data");
+    }
+
+    private static void PrepareDataFolders(string root, string dataRoot, string logPath)
+    {
+        foreach (var folder in new[] { "models", "inputs", "outputs", "work", "work-ui" })
+            Directory.CreateDirectory(Path.Combine(dataRoot, folder));
+
+        // The installer carries the official Piper models. Copy only missing
+        // files so an existing user model is never overwritten.
+        var bundledModels = Path.Combine(root, "models");
+        var userModels = Path.Combine(dataRoot, "models");
+        if (!Directory.Exists(bundledModels)) return;
+
+        foreach (var source in Directory.EnumerateFiles(bundledModels))
+        {
+            var destination = Path.Combine(userModels, Path.GetFileName(source));
+            if (File.Exists(destination)) continue;
+
+            File.Copy(source, destination);
+            AppendLog(logPath, $"Bundled model copied: {Path.GetFileName(source)}");
         }
     }
 
@@ -76,11 +111,11 @@ internal static class Program
         return result.ExitCode == 0;
     }
 
-    private static void StartCompose(string root, string logPath)
+    private static void StartCompose(string root, string dataRoot, string logPath)
     {
         AppendLog(logPath, "Docker Compose konténer indítása...");
         var result = RunProcess(
-            "docker", ["compose", "up", "-d", "--build"], root, logPath, TimeSpan.FromMinutes(30));
+            "docker", ["compose", "up", "-d", "--build"], root, logPath, TimeSpan.FromMinutes(30), dataRoot: dataRoot);
 
         if (result.ExitCode != 0)
         {
@@ -118,7 +153,8 @@ internal static class Program
         string workingDirectory,
         string logPath,
         TimeSpan timeout,
-        bool setPort = true)
+        bool setPort = true,
+        string? dataRoot = null)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -132,6 +168,8 @@ internal static class Program
 
         foreach (var argument in arguments) startInfo.ArgumentList.Add(argument);
         if (setPort) startInfo.Environment["AUDIOBOOK_PORT"] = Port.ToString();
+        if (!string.IsNullOrWhiteSpace(dataRoot))
+            startInfo.Environment["AUDIOBOOK_DATA_DIR"] = dataRoot.Replace('\\', '/');
 
         using var process = new Process { StartInfo = startInfo };
         try

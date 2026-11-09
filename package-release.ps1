@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string]$Version = "1.0.0"
+    [string]$Version = "1.0.1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -23,7 +23,9 @@ $items = @(
     "README.md",
     "docker-compose.yml",
     "build-launcher.ps1",
+    "build-installer.ps1",
     "install-windows.ps1",
+    "installer",
     "launcher",
     "package-release.ps1",
     "pyproject.toml",
@@ -60,6 +62,11 @@ Get-ChildItem -Path $staging -Directory -Filter "publish" -Recurse -ErrorAction 
 $launcherExe = Join-Path $releaseRoot "Offline-Audiobook-Creator-Launcher.exe"
 if (Test-Path $launcherExe) {
     Copy-Item -LiteralPath $launcherExe -Destination (Join-Path $staging "Offline-Audiobook-Creator-Launcher.exe") -Force
+}
+
+$setupExe = Join-Path $releaseRoot "Offline-Audiobook-Creator-Setup-$Version.exe"
+if (Test-Path $setupExe) {
+    Copy-Item -LiteralPath $setupExe -Destination (Join-Path $staging (Split-Path -Leaf $setupExe)) -Force
 }
 
 Compress-Archive -Path (Join-Path $staging "*") -DestinationPath $archive -CompressionLevel Optimal

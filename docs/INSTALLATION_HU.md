@@ -2,6 +2,26 @@
 
 ## Windows – ajánlott telepítés
 
+### Egyfájlos telepítő
+
+A kiadási csomagban található `Offline-Audiobook-Creator-Setup-1.0.1.exe` a
+klasszikus Windows-telepítő. A telepítő:
+
+1. telepíti a programfájlokat, a Start menü-parancsikont és az opcionális
+   asztali parancsikont;
+2. ellenőrzi a Docker Desktopot és a WSL2-t;
+3. hiányzó Docker Desktop esetén a `winget` segítségével meghívja a hivatalos
+   Docker Desktop telepítőt, vagy tartalékként letölti a hivatalos telepítőt;
+4. a Piper magyar és angol hangmodelleket is telepíti;
+5. első indításkor a felhasználó írható `%LOCALAPPDATA%\Offline Audiobook
+   Creator\data` könyvtárat használja az input, output és cache adatokhoz.
+
+A Docker Desktop és a WSL2 telepítése rendszergazdai jóváhagyást, a WSL első
+bekapcsolása pedig újraindítást kérhet. A Docker-képfelépítés első alkalommal
+internetkapcsolatot igényel; az alkalmazás a kép elkészülte után helyben fut.
+
+### Fejlesztői / Pythonos telepítés
+
 1. Telepíts Python 3.10, 3.11, 3.12 vagy 3.13 verziót.
 2. Telepítsd az FFmpeg-et, vagy hagyd, hogy a telepítő a `winget` segítségével
    megpróbálja feltenni.
@@ -22,7 +42,8 @@ dupla kattintással indítható. Az indító:
 3. megvárja, amíg a webes API elérhető lesz;
 4. megnyitja az alapértelmezett böngészőt a `http://127.0.0.1:8766` címen.
 
-Hiba esetén a projekt mappájában létrejön a `launcher.log` naplófájl.
+Hiba esetén a `%LOCALAPPDATA%\Offline Audiobook Creator\data` mappában
+létrejön a `launcher.log` naplófájl.
 
 Az EXE elkészítéséhez .NET 9 SDK szükséges:
 
@@ -32,6 +53,17 @@ Az EXE elkészítéséhez .NET 9 SDK szükséges:
 
 A `-SelfContained` változat futtatásához a felhasználónak nem kell külön .NET
 runtime-ot telepítenie.
+
+Az Inno Setup telepítő buildeléséhez telepítsd az Inno Setupot, majd futtasd:
+
+```powershell
+winget install --exact --id JRSoftware.InnoSetup
+.\build-installer.ps1 -Version 1.0.1
+```
+
+Ha a hangmodellek hiányoznak, a build script automatikusan letölti őket. A
+letöltés kihagyásával végzett ellenőrzéshez használd a `-SkipModelDownload`
+kapcsolót.
 
 PowerShellből ugyanez:
 

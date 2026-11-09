@@ -17,6 +17,29 @@ Offline PDF/DOCX/TXT/Markdown → MP3 hangoskönyv-készítő Piper TTS-sel.
 - Folytatható feldolgozás cache-sel.
 - Dockeres Linux-környezet NeMo-támogatással.
 
+## Rendes Windows-telepítő
+
+A `Offline-Audiobook-Creator-Setup-1.0.1.exe` telepítő létrehozza a program
+mappáját, a Start menü- és opcionális asztali parancsikont, valamint az első
+telepítéskor ellenőrzi a Docker Desktopot és a WSL2-t. Ha a Docker Desktop
+hiányzik és a `winget` elérhető, a telepítő meghívja a hivatalos Docker Desktop
+csomag telepítőjét. A Piper magyar és angol hangmodellek az installer részei.
+
+A telepítő a felhasználó írható AppData-mappáját használja az input, output és
+cache adatokhoz, ezért a programnak nem kell a Program Files mappájába írnia.
+A Docker-képfelépítés első alkalommal internetkapcsolatot igényel; utána a
+feldolgozás helyben, a Docker-konténerben történik.
+
+Fejlesztői gépen a telepítő újraépítése:
+
+```powershell
+winget install --exact --id JRSoftware.InnoSetup
+.\build-installer.ps1 -Version 1.0.1
+```
+
+Ha a `models` mappában hiányoznak a hangmodellek, a build script automatikusan
+letölti a hivatalos magyar és angol Piper fájlokat.
+
 ## Gyors telepítés Windowsra
 
 Töltsd le vagy klónozd a repositoryt, majd dupla kattintással futtasd:
@@ -38,8 +61,8 @@ PowerShellből:
 
 Dockeres használatnál az `Offline-Audiobook-Creator-Launcher.exe` elindítja a
 konténert, megvárja a webes felületet, majd megnyitja az alapértelmezett
-böngészőt a `http://127.0.0.1:8766` címen. A launchert a projekt mappájából
-futtasd, ahol a `docker-compose.yml` található.
+böngészőt a `http://127.0.0.1:8766` címen. A telepítő ezt a launchert a Start
+menübe és – ha kéred – az asztalra is kihelyezi.
 
 A részletes telepítési leírás: [docs/INSTALLATION_HU.md](docs/INSTALLATION_HU.md).
 

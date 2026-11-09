@@ -10,10 +10,12 @@ services:
       PYTHONIOENCODING: utf-8
       PYTHONUTF8: "1"
     volumes:
-      - ./models:/app/models:ro
-      - ./inputs:/app/inputs
-      - ./outputs:/app/outputs
-      - ./work:/app/work
-      - ./work-ui:/app/work-ui
+      # The launcher sets AUDIOBOOK_DATA_DIR to a per-user writable folder.
+      # When running Compose manually, the project folder remains the default.
+      - "${AUDIOBOOK_DATA_DIR:-.}/models:/app/models:ro"
+      - "${AUDIOBOOK_DATA_DIR:-.}/inputs:/app/inputs"
+      - "${AUDIOBOOK_DATA_DIR:-.}/outputs:/app/outputs"
+      - "${AUDIOBOOK_DATA_DIR:-.}/work:/app/work"
+      - "${AUDIOBOOK_DATA_DIR:-.}/work-ui:/app/work-ui"
     restart: unless-stopped
 
