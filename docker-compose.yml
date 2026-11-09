@@ -1,0 +1,19 @@
+services:
+  audiobook:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: offline-audiobook-maker
+    ports:
+      - "${AUDIOBOOK_PORT:-8765}:8765"
+    environment:
+      PYTHONIOENCODING: utf-8
+      PYTHONUTF8: "1"
+    volumes:
+      - ./models:/app/models:ro
+      - ./inputs:/app/inputs
+      - ./outputs:/app/outputs
+      - ./work:/app/work
+      - ./work-ui:/app/work-ui
+    restart: unless-stopped
+

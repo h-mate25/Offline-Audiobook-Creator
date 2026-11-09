@@ -1,0 +1,28 @@
+[project]
+name = "offline-audiobook-maker"
+version = "1.0.0"
+description = "Offline PDF/DOCX to MP3 audiobook maker using Piper TTS."
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "fastapi>=0.125.0",
+    "piper-tts>=1.8.0",
+    "pymupdf>=1.24.0",
+    "python-multipart>=0.0.20",
+    "python-docx>=1.1.2",
+    "uvicorn>=0.38.0",
+]
+
+[project.scripts]
+audiobook-maker = "audiobook_maker.cli:main"
+audiobook-ui = "audiobook_maker.web:main"
+
+[build-system]
+requires = ["setuptools>=70", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+audiobook_maker = ["static/*"]
+

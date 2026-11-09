@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Offline Audiobook Maker</title>
+    <link rel="stylesheet" href="/static/styles.css?v=8" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Offline Piper TTS</p>
+            <h1>Hangoskönyv készítő</h1>
+          </div>
+          <button class="status-pill guide-button" id="guideButton" type="button">
+            <span>Felhasználói útmutató</span>
+          </button>
+        </header>
+
+        <nav class="stepper" aria-label="Hangoskönyv készítés lépései">
+          <div class="step is-active" data-step-indicator="1"><span>1</span><strong>Forrás</strong></div>
+          <div class="step" data-step-indicator="2"><span>2</span><strong>Hangteszt</strong></div>
+          <div class="step" data-step-indicator="3"><span>3</span><strong>Szöveg</strong></div>
+          <div class="step" data-step-indicator="4"><span>4</span><strong>Generálás</strong></div>
+        </nav>
+
+        <form id="jobForm" class="layout">
+          <section class="panel source-panel wizard-panel" data-wizard-step="1" aria-labelledby="sourceTitle">
+            <div class="panel-heading">
+              <span class="panel-index">1</span>
+              <div>
+                <h2 id="sourceTitle">Forrás</h2>
+                <p>PDF, DOCX, TXT vagy MD dokumentum</p>
+              </div>
+            </div>
+
+            <div class="segmented" role="tablist" aria-label="Forrás típusa">
+              <label>
+                <input type="radio" name="source_mode" value="upload" checked />
+                <span>Feltöltés</span>
+              </label>
+              <label>
+                <input type="radio" name="source_mode" value="path" />
+                <span>Helyi útvonal</span>
+              </label>
+            </div>
+
+            <label class="file-drop" id="fileDrop">
+              <input id="fileInput" name="file" type="file" accept=".pdf,.docx,.txt,.md" />
+              <span class="file-icon">PDF</span>
+              <strong id="fileLabel">Válassz dokumentumot</strong>
+              <small>vagy húzd ide a fájlt</small>
+            </label>
+
+            <label class="field path-field is-hidden" id="pathField">
+              <span>Helyi fájlútvonal</span>
+              <input id="localPath" name="local_path" type="text" placeholder="C:\Users\Asus\Downloads\MEMORANDUM.pdf" />
+            </label>
+
+            <label class="field">
+              <span>Kimeneti fájlnév</span>
+              <input id="outputName" name="output_name" type="text" placeholder="automatikus név" />
+            </label>
+
+            <button class="primary action preview-load" id="loadPreview" type="button">Fájl betöltése és tovább</button>
+          </section>
+
+          <section class="panel voice-panel wizard-panel is-hidden" data-wizard-step="2" aria-labelledby="voiceTitle">
+            <div class="panel-heading">
+              <span class="panel-index">2</span>
+              <div>
+                <h2 id="voiceTitle">Hang</h2>
+                <p>Nyelv, modell és természetesség</p>
+              </div>
+            </div>
+
+            <div class="grid two">
+              <label class="field">
+                <span>Nyelv</span>
+                <select id="language" name="language">
+                  <option value="hu">Magyar</option>
+                  <option value="en">English</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span>Hangmodell</span>
+                <select id="voice" name="voice"></select>
+              </label>
+            </div>
+
+            <div class="grid two">
+              <label class="field">
+                <span>Szöveg-normalizálás</span>
+                <select id="normalizer" name="normalizer">
+                  <option value="auto">Automatikus (NeMo → helyi)</option>
+                  <option value="local">Helyi szabályok</option>
+                  <option value="nemo">NeMo Text Processing</option>
+                </select>
+                <small id="normalizerStatus">NeMo állapotának ellenőrzése…</small>
+              </label>
+            </div>
+
+            <div class="preset-row" aria-label="Hang presetek">
+              <button class="preset is-active" type="button" data-preset="natural">Természetes</button>
+              <button class="preset" type="button" data-preset="calm">Nyugodt</button>
+              <button class="preset" type="button" data-preset="compact">Gyorsabb</button>
+            </div>
+
+            <div class="slider-stack">
+              <label class="slider-field">
+                <span>Mondatszünet <output id="sentenceSilenceValue">0.18s</output></span>
+                <input id="sentenceSilence" name="sentence_silence" type="range" min="0.05" max="0.90" step="0.01" value="0.18" />
+              </label>
+
+              <label class="slider-field">
+                <span>Tempó <output id="lengthScaleValue">1.07</output></span>
+                <input id="lengthScale" name="length_scale" type="range" min="0.85" max="1.35" step="0.01" value="1.07" />
+              </label>
+
+              <label class="slider-field">
+                <span>Szövegdarab méret <output id="maxCharsValue">1200</output></span>
+                <input id="maxChars" name="max_chars" type="range" min="500" max="2200" step="50" value="1200" />
+              </label>
+            </div>
+
+            <details class="advanced">
+              <summary>Haladó Piper hangolás</summary>
+              <div class="grid two">
+                <label class="field">
+                  <span>Noise scale</span>
+                  <input id="noiseScale" name="noise_scale" type="number" min="0" max="2" step="0.01" value="0.28" />
+                </label>
+                <label class="field">
+                  <span>Noise width</span>
+                  <input id="noiseWScale" name="noise_w_scale" type="number" min="0" max="2" step="0.01" value="0.11" />
+                </label>
+              </div>
+            </details>
+
+            <div class="voice-test-box">
+              <div class="voice-test-heading">
+                <div>
+                  <h3>Hang kipróbálása</h3>
+                  <p>Írj be egy rövid mondatot, és hallgasd meg a kiválasztott beállítással.</p>
+                </div>
+                <span class="test-badge">offline</span>
+              </div>
+              <textarea id="voiceTestSentence" class="voice-test-input" rows="3">Ez egy rövid próbamondat a kiválasztott hanghoz.</textarea>
+              <div class="voice-test-actions">
+                <button class="secondary action" id="voiceTest" type="button">Hang tesztelése</button>
+                <span id="voiceTestStatus" class="voice-test-status">Még nincs hangminta.</span>
+              </div>
+              <audio id="voiceTestAudio" class="voice-test-audio is-hidden" controls preload="none"></audio>
+            </div>
+
+            <div class="wizard-actions">
+              <button class="back-button" id="backToSource" type="button">Vissza</button>
+              <button class="primary action" id="toText" type="button">Tovább a szöveghez</button>
+            </div>
+          </section>
+
+          <section class="panel editor-panel wizard-panel is-hidden" id="editorPanel" data-wizard-step="3" aria-labelledby="editorTitle">
+            <div class="panel-heading">
+              <span class="panel-index">3</span>
+              <div>
+                <h2 id="editorTitle">Generálási szöveg</h2>
+                <p id="previewStatus">A ténylegesen felolvasandó szöveg</p>
+              </div>
+            </div>
+
+            <div class="editor-toolbar" aria-label="Egyszerű beszédutasítások">
+              <span class="toolbar-label">Beszúrás:</span>
+              <button class="tool-button" type="button" data-pause="0.30">Szünet 0,3 mp</button>
+              <button class="tool-button" type="button" data-pause="0.50">Szünet 0,5 mp</button>
+              <button class="tool-button" type="button" data-pause="1.00">Szünet 1 mp</button>
+              <button class="tool-button" type="button" data-pause="3.00">Szünet 3 mp</button>
+              <button class="tool-button" type="button" data-pause="5.00">Szünet 5 mp</button>
+            </div>
+
+            <textarea id="editor" class="text-editor" spellcheck="true" aria-label="Generálási szöveg"></textarea>
+
+            <div class="editor-meta">
+              <span><strong id="charCount">0</strong> karakter</span>
+              <span><strong id="chunkCount">0</strong> feldolgozási darab</span>
+            </div>
+
+            <div class="editor-actions">
+              <label class="field preview-chunks-field">
+                <span>Hangminta darabjai</span>
+                <input id="previewChunks" name="preview_chunks" type="number" min="1" max="10" value="2" />
+              </label>
+              <div class="preview-action-group">
+                <button class="secondary action" id="audioPreview" type="button">Rövid dokumentum-hangminta</button>
+                <span id="audioPreviewStatus" class="voice-test-status">Még nincs dokumentum-hangminta.</span>
+                <audio id="audioPreviewAudio" class="voice-test-audio is-hidden" controls preload="none"></audio>
+                <a class="download voice-test-download is-hidden" id="audioPreviewDownload" href="#">Hangminta letöltése</a>
+              </div>
+            </div>
+
+            <div class="wizard-actions">
+              <button class="back-button" id="backToVoice" type="button">Vissza a hanghoz</button>
+              <button class="primary action" id="toGeneration" type="button">Tovább a generáláshoz</button>
+            </div>
+          </section>
+
+          <section class="panel run-panel wizard-panel is-hidden" data-wizard-step="4" aria-labelledby="runTitle">
+            <div class="panel-heading">
+              <span class="panel-index">4</span>
+              <div>
+                <h2 id="runTitle">Generálás</h2>
+                <p>A szerkesztett szövegből készül az MP3</p>
+              </div>
+            </div>
+
+            <div class="grid two">
+              <label class="check-field">
+                <input id="force" name="force" type="checkbox" />
+                <span>Cache újragenerálása</span>
+              </label>
+            </div>
+
+            <div class="action-row">
+              <button class="primary action" type="submit" data-job-type="full">Teljes MP3</button>
+            </div>
+
+            <div class="wizard-actions">
+              <button class="back-button" id="backToText" type="button">Vissza a szöveghez</button>
+            </div>
+
+            <div class="progress-card" aria-live="polite">
+              <div class="progress-meta">
+                <span id="progressText">Nincs futó munka</span>
+                <span id="progressCount">0 / 0</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-bar" id="progressBar"></div>
+              </div>
+            </div>
+
+            <a class="download is-hidden" id="downloadLink" href="#">MP3 letöltése</a>
+          </section>
+
+          <section class="panel log-panel is-hidden" id="logPanel" aria-labelledby="logTitle">
+            <div class="panel-heading">
+              <div>
+                <h2 id="logTitle">Futási napló</h2>
+                <p>Chunkok, cache és hibák</p>
+              </div>
+            </div>
+            <pre id="logBox" class="log-box">Készen áll.</pre>
+          </section>
+        </form>
+      </section>
+    </main>
+    <div class="modal-backdrop is-hidden" id="guideModal" role="presentation" aria-hidden="true">
+      <section class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">Offline használat</p>
+            <h2 id="guideTitle">Felhasználói útmutató</h2>
+          </div>
+          <button class="modal-close" id="closeGuide" type="button" aria-label="Útmutató bezárása">×</button>
+        </div>
+
+        <div class="guide-content">
+          <section>
+            <h3>1. Forrás — mit kell betölteni?</h3>
+            <dl class="guide-list">
+              <dt>Feltöltés</dt><dd>A számítógépről választott PDF, DOCX, TXT vagy MD fájlt tölti be.</dd>
+              <dt>Helyi útvonal</dt><dd>A gépen található fájl teljes elérési útját használja, például <code>C:\Konyvek\konyv.pdf</code>.</dd>
+              <dt>Kimeneti fájlnév</dt><dd>Opcionális név a kész MP3-hoz. Üresen hagyva az alkalmazás ad nevet.</dd>
+              <dt>Fájl betöltése és tovább</dt><dd>Kiolvassa, megtisztítja és szerkeszthető előnézetként megjeleníti a dokumentum szövegét.</dd>
+            </dl>
+          </section>
+
+          <section>
+            <h3>2. Hangteszt — a hang beállítása</h3>
+            <dl class="guide-list">
+              <dt>Nyelv</dt><dd>Magyar vagy angol hangkörnyezetet választ.</dd>
+              <dt>Hangmodell</dt><dd>Az adott nyelvhez telepített Piper hangot választja ki.</dd>
+              <dt>Szöveg-normalizálás</dt><dd>Az Automatikus mód a NeMo-t használja, ha elérhető, egyébként a helyi szabályokra vált. A normalizálás a számokat, mértékegységeket és rövidítéseket teszi beszédbarátabbá.</dd>
+              <dt>Természetes / Nyugodt / Gyorsabb</dt><dd>Előre összeállított hangbeállítások. Bármelyik után kézzel is finomíthatod az értékeket.</dd>
+              <dt>Mondatszünet</dt><dd>A mondatok közötti alapértelmezett szünet hossza.</dd>
+              <dt>Tempó</dt><dd>A beszéd sebessége. A nagyobb érték lassabb beszédet jelent.</dd>
+              <dt>Szövegdarab méret</dt><dd>A feldolgozási egységek becsült mérete. Nagy dokumentumnál a kisebb érték stabilabb feldolgozást adhat.</dd>
+              <dt>Haladó Piper hangolás</dt><dd>Ritkábban szükséges finomhangolás. A Noise scale és Noise width a hang természetességét és változatosságát befolyásolja. A rész alapból zárva van.</dd>
+              <dt>Hang tesztelése</dt><dd>A beírt próbamondatból rövid MP3-mintát készít; a lejátszás és a letöltés itt jelenik meg.</dd>
+            </dl>
+          </section>
+
+          <section>
+            <h3>3. Szöveg — szerkesztés és rövid próba</h3>
+            <dl class="guide-list">
+              <dt>Szövegszerkesztő</dt><dd>A ténylegesen felolvasandó szöveg. Generálás előtt szabadon átírható.</dd>
+              <dt>Szünet 0,3 / 0,5 / 1 / 3 / 5 mp</dt><dd>A kurzor helyére valódi csendet szúr be. A gombok kijelölt szöveget is lecserélnek.</dd>
+              <dt>Hangminta darabjai</dt><dd>Megadja, hány szövegdarabból készüljön a rövid dokumentum-hangminta.</dd>
+              <dt>Rövid dokumentum-hangminta</dt><dd>Csak a beállított számú első darabot dolgozza fel. Az eredmény a gomb alatt lejátszható és letölthető.</dd>
+              <dt>Vissza a hanghoz / Tovább a generáláshoz</dt><dd>A munkafolyamat előző vagy következő lépésére visz.</dd>
+            </dl>
+          </section>
+
+          <section>
+            <h3>4. Generálás — a teljes MP3 elkészítése</h3>
+            <dl class="guide-list">
+              <dt>Cache újragenerálása</dt><dd>Bekapcsolva figyelmen kívül hagyja a korábbi részeredményeket, és mindent újra elkészít.</dd>
+              <dt>Teljes MP3</dt><dd>A teljes szerkesztett dokumentumból elkészíti a hangoskönyvet.</dd>
+              <dt>Futási napló</dt><dd>Megmutatja a feldolgozás állapotát, a darabokat, a cache-t és az esetleges hibákat.</dd>
+              <dt>MP3 letöltése</dt><dd>A sikeres generálás után megjelenő gombbal menthető el a kész hangoskönyv.</dd>
+            </dl>
+          </section>
+
+          <p class="guide-tip"><strong>Javasolt sorrend:</strong> töltsd be a forrást, próbáld ki a hangot egy mondattal, ellenőrizd a szövegelőnézetet, készíts rövid dokumentum-hangmintát, majd indítsd a teljes MP3-generálást.</p>
+        </div>
+      </section>
+    </div>
+    <script src="/static/app.js?v=8"></script>
+  </body>
+</html>
+
