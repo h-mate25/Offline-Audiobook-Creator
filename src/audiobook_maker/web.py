@@ -71,6 +71,9 @@ def settings() -> dict[str, object]:
             "lengthScale": 1.07,
             "maxChars": 1200,
             "previewChunks": 2,
+            "preset": "natural",
+            "linkMode": "domain",
+            "dynamicPauses": True,
         },
         "normalization": nemo_status(),
     }
@@ -112,6 +115,10 @@ def create_job(
     preview_chunks: Annotated[int, Form()] = 2,
     job_type: Annotated[str, Form()] = "full",
     normalizer: Annotated[str, Form()] = "auto",
+    preset: Annotated[str, Form()] = "natural",
+    link_mode: Annotated[str, Form()] = "domain",
+    dynamic_pauses: Annotated[bool, Form()] = True,
+    pronunciations: Annotated[str, Form()] = "",
     force: Annotated[bool, Form()] = False,
     edited_text: Annotated[str, Form()] = "",
     file: Annotated[UploadFile | None, File()] = None,
@@ -120,6 +127,10 @@ def create_job(
         raise HTTPException(status_code=400, detail="Unsupported language.")
     if normalizer not in {"auto", "local", "nemo"}:
         raise HTTPException(status_code=400, detail="Unsupported text normalizer.")
+    if preset not in {"natural", "calm", "compact"}:
+        raise HTTPException(status_code=400, detail="Unsupported speech preset.")
+    if link_mode not in {"domain", "skip", "full"}:
+        raise HTTPException(status_code=400, detail="Unsupported web address mode.")
 
     input_path = _resolve_input(source_mode, local_path, file)
     voice_path = _resolve_voice(voice)
@@ -155,6 +166,11 @@ def create_job(
         edited_path = WORK_UI_DIR / f"{job_id}-edited.txt"
         edited_path.write_text(edited_text, encoding="utf-8")
         args.extend(["--text-file", str(edited_path)])
+    if pronunciations.strip():
+        WORK_UI_DIR.mkdir(parents=True, exist_ok=True)
+        pronunciation_path = WORK_UI_DIR / f"{job_id}-pronunciations.txt"
+        pronunciation_path.write_text(pronunciations, encoding="utf-8")
+        args.extend(["--pronunciation-file", str(pronunciation_path)])
     if noise_scale.strip():
         args.extend(["--noise-scale", noise_scale.strip()])
     if noise_w_scale.strip():
@@ -162,6 +178,9 @@ def create_job(
     if audio_preview:
         args.extend(["--limit-chunks", str(max(1, preview_chunks))])
     args.extend(["--normalizer", normalizer])
+    args.extend(["--preset", preset, "--link-mode", link_mode])
+    if not dynamic_pauses:
+        args.append("--no-dynamic-pauses")
     if force:
         args.append("--force")
 

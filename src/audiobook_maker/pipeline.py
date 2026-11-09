@@ -6,7 +6,13 @@ from pathlib import Path
 from .audio import Voice, VoiceTuning, chunk_hash, combine_wavs_to_mp3, ensure_tools, is_valid_wav, synthesize_chunk
 from .document import read_document
 from .normalization import normalize_chunks
-from .text import chunk_text
+from .text import (
+    SpeechTextOptions,
+    chunk_text,
+    get_prosody_profile,
+    parse_pronunciation_map,
+    prepare_speech_text,
+)
 
 
 def make_audiobook(
@@ -20,11 +26,27 @@ def make_audiobook(
     source_text: str | None = None,
     force: bool = False,
     normalizer: str = "auto",
+    preset: str = "natural",
+    link_mode: str = "domain",
+    dynamic_pauses: bool = True,
+    pronunciations: str | None = None,
 ) -> None:
     ensure_tools()
 
     text = source_text if source_text is not None else read_document(input_path)
-    chunks = chunk_text(text, max_chars=max_chars)
+    profile = get_prosody_profile(preset)
+    speech_text = prepare_speech_text(
+        text,
+        language=voice.language,
+        options=SpeechTextOptions(
+            link_mode=link_mode,
+            dynamic_pauses=dynamic_pauses,
+            paragraph_pause=profile.paragraph_pause,
+            clause_pause=profile.clause_pause,
+            pronunciation_map=parse_pronunciation_map(pronunciations),
+        ),
+    )
+    chunks = chunk_text(speech_text, max_chars=max_chars)
     if limit_chunks is not None:
         chunks = chunks[:limit_chunks]
     if not chunks:

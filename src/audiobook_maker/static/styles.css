@@ -298,14 +298,26 @@ h2 {
 }
 
 .field input,
-.field select {
+.field select,
+.field textarea {
   width: 100%;
-  min-height: 44px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  padding: 0 12px;
   background: #fff;
   color: var(--ink);
+}
+
+.field input,
+.field select {
+  min-height: 44px;
+  padding: 0 12px;
+}
+
+.field textarea {
+  min-height: 92px;
+  resize: vertical;
+  padding: 10px 12px;
+  line-height: 1.45;
 }
 
 .field small {
@@ -329,6 +341,36 @@ h2 {
 .check-field input {
   width: 18px;
   height: 18px;
+}
+
+.speech-options {
+  margin-top: 12px;
+}
+
+.speech-check-field {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 3px;
+  padding: 9px 12px;
+}
+
+.speech-check-field input {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.speech-check-field span,
+.speech-check-field small {
+  grid-column: 2;
+}
+
+.speech-check-field small {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .path-field {

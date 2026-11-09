@@ -38,6 +38,29 @@ def main(argv: list[str] | None = None) -> int:
         default="auto",
         help="Speech text normalization backend: auto, local, or strict NeMo.",
     )
+    make.add_argument(
+        "--preset",
+        choices=["natural", "calm", "compact"],
+        default="natural",
+        help="Speech/prosody profile used before TTS.",
+    )
+    make.add_argument(
+        "--link-mode",
+        choices=["domain", "skip", "full"],
+        default="domain",
+        help="How web addresses are handled: domain, skip, or full.",
+    )
+    make.add_argument(
+        "--no-dynamic-pauses",
+        dest="dynamic_pauses",
+        action="store_false",
+        help="Disable structural pauses at paragraphs and clauses.",
+    )
+    make.add_argument(
+        "--pronunciation-file",
+        type=Path,
+        help="UTF-8 file with source = spoken form pronunciation overrides.",
+    )
     make.add_argument("--force", action="store_true", help="Regenerate all chunks.")
 
     ui = subparsers.add_parser("ui", help="Start the local web interface.")
@@ -70,6 +93,14 @@ def main(argv: list[str] | None = None) -> int:
             source_text=args.text_file.read_text(encoding="utf-8") if args.text_file else None,
             force=args.force,
             normalizer=args.normalizer,
+            preset=args.preset,
+            link_mode=args.link_mode,
+            dynamic_pauses=args.dynamic_pauses,
+            pronunciations=(
+                args.pronunciation_file.read_text(encoding="utf-8")
+                if args.pronunciation_file
+                else None
+            ),
         )
         return 0
 

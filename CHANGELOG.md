@@ -1,5 +1,13 @@
 # Változásnapló
 
+## Következő kiadás
+
+- Beszédbarát URL- és e-mail-előkészítés, a hosszú webcímek NeMo-biztos
+  kezelésével.
+- Dinamikus, profilfüggő bekezdés- és tagmondat-szünetek.
+- Egyéni kiejtési szabályok a webes felületen és a CLI-ben.
+- A természetesebb szövegkezelés beállításai bekerültek a kézikönyvbe.
+
 ## 1.0.1
 
 - Klasszikus Windows-telepítő Inno Setuppal.

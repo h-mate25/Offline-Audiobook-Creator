@@ -80,7 +80,6 @@ def normalize_chunks(
 
     try:
         normalizer = _get_nemo_normalizer(language, cache_dir)
-        normalized = [_normalize_chunk_with_nemo(chunk, normalizer) for chunk in cleaned_chunks]
     except Exception as exc:
         if mode == "nemo":
             raise NormalizationError(f"NeMo normalizálási hiba: {_short_exception(exc)}") from exc
@@ -90,6 +89,29 @@ def normalize_chunks(
             warning=f"NeMo hibába ütközött, ezért helyi tisztítás fut. {_short_exception(exc)}",
         )
 
+    normalized: list[str] = []
+    fallback_count = 0
+    fallback_reason = ""
+    for chunk in cleaned_chunks:
+        try:
+            normalized.append(_normalize_chunk_with_nemo(chunk, normalizer))
+        except Exception as exc:
+            if mode == "nemo":
+                raise NormalizationError(f"NeMo normalizálási hiba: {_short_exception(exc)}") from exc
+            normalized.append(chunk)
+            fallback_count += 1
+            if not fallback_reason:
+                fallback_reason = _short_exception(exc)
+
+    if fallback_count:
+        return NormalizationResult(
+            normalized,
+            backend="nemo-partial-fallback",
+            warning=(
+                f"{fallback_count} szövegdarabnál a NeMo nem tudott normalizálni, "
+                f"ezért azok helyi tisztítással folytatódtak. {fallback_reason}"
+            ),
+        )
     return NormalizationResult(normalized, backend="nemo")
 
 
@@ -133,7 +155,7 @@ def _normalize_chunk_with_nemo(chunk: str, normalizer: Any) -> str:
     cursor = 0
     for match in _PAUSE_MARKER_RE.finditer(chunk):
         pieces.append(_normalize_fragment(chunk[cursor : match.start()], normalizer))
-        pieces.append(match.group(0))
+        pieces.append(f" {match.group(0)} ")
         cursor = match.end()
     pieces.append(_normalize_fragment(chunk[cursor:], normalizer))
     return _tidy_normalized_text("".join(pieces))

@@ -8,6 +8,8 @@ const language = document.querySelector("#language");
 const voice = document.querySelector("#voice");
 const normalizer = document.querySelector("#normalizer");
 const normalizerStatus = document.querySelector("#normalizerStatus");
+const presetInput = document.querySelector("#preset");
+const dynamicPauses = document.querySelector("#dynamicPauses");
 const guideButton = document.querySelector("#guideButton");
 const guideModal = document.querySelector("#guideModal");
 const closeGuideButton = document.querySelector("#closeGuide");
@@ -191,6 +193,7 @@ function applyPreset(name) {
   const preset = presets[name];
   if (!preset) return;
 
+  presetInput.value = name;
   sliders.sentenceSilence.value = preset.sentenceSilence;
   sliders.lengthScale.value = preset.lengthScale;
   sliders.maxChars.value = preset.maxChars;
@@ -330,6 +333,8 @@ async function submitAudioJob(jobType, textOverride = null) {
   formData.delete("file");
   formData.set("edited_text", textOverride ?? editor.value);
   formData.set("job_type", jobType);
+  formData.set("preset", presetInput.value || "natural");
+  formData.set("dynamic_pauses", dynamicPauses.checked ? "true" : "false");
   formData.set("force", document.querySelector("#force").checked ? "true" : "false");
 
   activeJobKind = jobType;

@@ -55,6 +55,16 @@ A **Magyar** és **English** választó határozza meg a hangkörnyezetet. A
 A normalizálás a számokat, mértékegységeket, rövidítéseket és egyes írásjeleket
 beszédbarátabb formára alakítja.
 
+### Webcímek és tagolás
+
+A **Webcímek kezelése** alapbeállítása csak a domainnevet tartja meg egy
+linkből. A hosszú útvonal és lekérdezés így nem zavarja meg a hangot. Választható
+a webcím teljes kihagyása vagy a teljes cím felolvasása is.
+
+A **Természetes tagolási szünetek** bekezdések és hosszabb tagmondatok határán
+finom extra csendet illesztenek be. Ez különösen hosszabb, könyvszerű szövegnél
+segít, miközben a mondatok közötti alap-szünetet a Piper beállítása adja.
+
 ### Hangpresetek
 
 - **Természetes:** kiegyensúlyozott alapbeállítás.
@@ -77,6 +87,20 @@ darabméret, Noise scale 0,28 és Noise width 0,11.
 A **Haladó Piper hangolás** rész alapból zárva van. A Noise scale és Noise
 width ritkábban szükséges finomhangolás; első használatkor érdemes az alapértéket
 megtartani.
+
+### Haladó szövegkezelés
+
+Az **Egyéni kiejtési javítások** mezőben soronként megadható, hogyan hangozzon
+egy rövidítés vagy szakkifejezés:
+
+```text
+Kft. = káefté
+AI = ááj
+```
+
+Az egyenlőségjel bal oldalán szereplő alakot a jobb oldali felolvasandó alakra
+cseréli a program. A beépített magyar és angol rövidítés-szabályok ettől
+függetlenül automatikusan működnek.
 
 ### Hang tesztelése
 

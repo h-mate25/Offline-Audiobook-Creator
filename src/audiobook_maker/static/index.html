@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Offline Audiobook Maker</title>
-    <link rel="stylesheet" href="/static/styles.css?v=8" />
+    <link rel="stylesheet" href="/static/styles.css?v=9" />
   </head>
   <body>
     <main class="app-shell">
@@ -103,11 +103,30 @@
               </label>
             </div>
 
+            <div class="grid two speech-options">
+              <label class="field">
+                <span>Webcímek kezelése</span>
+                <select id="linkMode" name="link_mode">
+                  <option value="domain" selected>Csak a domain felolvasása</option>
+                  <option value="skip">Webcímek kihagyása</option>
+                  <option value="full">Teljes webcím felolvasása</option>
+                </select>
+                <small>A hosszú linkek nem zavarják meg a NeMo normalizálását.</small>
+              </label>
+
+              <label class="check-field speech-check-field">
+                <input id="dynamicPauses" name="dynamic_pauses" type="checkbox" checked />
+                <span>Természetes tagolási szünetek</span>
+                <small>Bekezdéseknél és pontosvesszőknél finom extra szünetet illeszt be.</small>
+              </label>
+            </div>
+
             <div class="preset-row" aria-label="Hang presetek">
               <button class="preset is-active" type="button" data-preset="natural">Természetes</button>
               <button class="preset" type="button" data-preset="calm">Nyugodt</button>
               <button class="preset" type="button" data-preset="compact">Gyorsabb</button>
             </div>
+            <input id="preset" name="preset" type="hidden" value="natural" />
 
             <div class="slider-stack">
               <label class="slider-field">
@@ -138,6 +157,15 @@
                   <input id="noiseWScale" name="noise_w_scale" type="number" min="0" max="2" step="0.01" value="0.11" />
                 </label>
               </div>
+            </details>
+
+            <details class="advanced speech-advanced">
+              <summary>Haladó szövegkezelés</summary>
+              <label class="field">
+                <span>Egyéni kiejtési javítások</span>
+                <textarea id="pronunciations" name="pronunciations" rows="4" placeholder="Kft. = káefté&#10;AI = ááj"></textarea>
+                <small>Soronként egy szabály: eredeti = felolvasandó alak. A beépített magyar és angol rövidítések automatikusan működnek.</small>
+              </label>
             </details>
 
             <div class="voice-test-box">
@@ -282,11 +310,14 @@
               <dt>Nyelv</dt><dd>Magyar vagy angol hangkörnyezetet választ.</dd>
               <dt>Hangmodell</dt><dd>Az adott nyelvhez telepített Piper hangot választja ki.</dd>
               <dt>Szöveg-normalizálás</dt><dd>Az Automatikus mód a NeMo-t használja, ha elérhető, egyébként a helyi szabályokra vált. A normalizálás a számokat, mértékegységeket és rövidítéseket teszi beszédbarátabbá.</dd>
+              <dt>Webcímek kezelése</dt><dd>Alapból csak a domain hangzik el, így egy hosszú link nem töri meg a beszéd ritmusát. A webcímek teljesen ki is hagyhatók, vagy kérhető a teljes cím felolvasása.</dd>
+              <dt>Természetes tagolási szünetek</dt><dd>Bekezdéseknél és hosszabb tagmondatoknál visszafogott extra csendeket illeszt be. A mondatok alap-szünetét továbbra is a Mondatszünet értéke szabályozza.</dd>
               <dt>Természetes / Nyugodt / Gyorsabb</dt><dd>Előre összeállított hangbeállítások. Bármelyik után kézzel is finomíthatod az értékeket.</dd>
               <dt>Mondatszünet</dt><dd>A mondatok közötti alapértelmezett szünet hossza.</dd>
               <dt>Tempó</dt><dd>A beszéd sebessége. A nagyobb érték lassabb beszédet jelent.</dd>
               <dt>Szövegdarab méret</dt><dd>A feldolgozási egységek becsült mérete. Nagy dokumentumnál a kisebb érték stabilabb feldolgozást adhat.</dd>
               <dt>Haladó Piper hangolás</dt><dd>Ritkábban szükséges finomhangolás. A Noise scale és Noise width a hang természetességét és változatosságát befolyásolja. A rész alapból zárva van.</dd>
+              <dt>Haladó szövegkezelés</dt><dd>Soronként egyéni kiejtési szabályt adhatsz meg, például <code>Kft. = káefté</code>. Ezzel neveket, rövidítéseket és szakkifejezéseket lehet a választott hanghoz igazítani.</dd>
               <dt>Hang tesztelése</dt><dd>A beírt próbamondatból rövid MP3-mintát készít; a lejátszás és a letöltés itt jelenik meg.</dd>
             </dl>
           </section>
@@ -316,7 +347,7 @@
         </div>
       </section>
     </div>
-    <script src="/static/app.js?v=8"></script>
+    <script src="/static/app.js?v=9"></script>
   </body>
 </html>
 

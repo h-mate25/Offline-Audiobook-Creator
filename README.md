@@ -14,6 +14,10 @@ Offline PDF/DOCX/TXT/Markdown → MP3 hangoskönyv-készítő Piper TTS-sel.
 - 0,3 / 0,5 / 1 / 3 / 5 másodperces beszúrható szünetek.
 - Természetes, nyugodt és gyorsabb hangpresetek.
 - Automatikus NeMo → helyi normalizálás.
+- Beszédbarát webcím- és e-mail-kezelés, így a hosszú URL-ek nem törik meg a
+  normalizálást.
+- Dinamikus bekezdés- és tagmondat-szünetek a természetesebb ritmusért.
+- Beépített és egyéni kiejtési szótár rövidítésekhez és nevekre.
 - Folytatható feldolgozás cache-sel.
 - Dockeres Linux-környezet NeMo-támogatással.
 
@@ -96,6 +100,33 @@ Ezután: `http://127.0.0.1:8766`.
 
 A Dockeres változat Linuxos Python-környezetben futtatja a NeMo Text Processinget.
 Natív Windows alatt az Automatikus mód szükség esetén a helyi szabályokra vált.
+
+## Természetesebb beszéd finomhangolása
+
+A **Webcímek kezelése** alapértelmezésben csak a domainnevet tartja meg, majd
+nyelv szerint „pont”/„dot” alakban készíti elő. A hosszú linkek elhagyhatók, a
+teljes cím pedig külön választható.
+
+A **Természetes tagolási szünetek** bekezdéseknél és tagmondatoknál óvatosan
+extra csendet illesztenek be. A mondatok közötti alap-szünetet továbbra is a
+Piper **Mondatszünet** értéke adja.
+
+Az **Egyéni kiejtési javítások** mezőben soronként adható meg szabály:
+
+```text
+Kft. = káefté
+AI = ááj
+```
+
+A parancssoros használat ugyanezeket a lehetőségeket támogatja:
+
+```powershell
+.\.venv\Scripts\audiobook-maker.exe make .\book.pdf --language hu `
+  --preset natural --link-mode domain --pronunciation-file .\pronunciations.txt
+```
+
+CUDA/NVIDIA GPU gyorsítás nincs bekapcsolva; a feldolgozás Piperrel és a
+Dockerben futó NeMo normalizálóval CPU-n, offline történik.
 
 ## Mappák
 
