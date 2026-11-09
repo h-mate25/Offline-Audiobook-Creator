@@ -177,11 +177,12 @@ python -m compileall -q src
 node --check src\\audiobook_maker\\static\\app.js
 ```
 
-A szövegfeldolgozási tesztek futtatása:
+A szövegfeldolgozási tesztek futtatása (a tesztfájlok pytest-kompatibilisek):
 
 ```powershell
 $env:PYTHONPATH = "src"
-python -m unittest discover -s tests
+python -m pip install pytest
+python -m pytest
 ```
 
 Windows-telepítő buildelése:
